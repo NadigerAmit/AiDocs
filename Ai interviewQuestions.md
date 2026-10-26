@@ -1,3 +1,42 @@
+
+---
+
+# AI And Machine Learning Interview Questions
+
+## Technical Precision Notes And Study Method
+
+This question bank contains several generations of notes and intentionally repeated topics. Keep the earlier examples for review, but use the qualifications below where a short interview answer might otherwise sound universal.
+
+## Precision Notes
+
+1. **Probability is not certainty.** A classifier's softmax or sigmoid output can be poorly calibrated. State how calibration was evaluated and avoid interpreting a score as a guaranteed likelihood.
+2. **Stratification is not always the right split.** Stratified folds preserve label proportions, but patient-, user-, site-, or time-grouping takes priority when observations are correlated or time-dependent. Never split related observations across folds merely to preserve class balance.
+3. **Preprocessing must be fit without evaluation leakage.** Fit scaling, imputation, feature selection, target encoding, and resampling inside each training fold. Apply the fitted transformation to validation/test data without refitting.
+4. **Dropout inference scaling depends on the implementation.** Most modern frameworks use inverted dropout: activations are scaled during training and dropout is disabled at inference. Do not describe inference as always scaling all weights by the drop probability.
+5. **Batch normalization's benefit is empirical, not a single settled explanation.** It uses batch-related statistics during training and stored statistics (or configured behavior) at evaluation. It can affect optimization and regularization; describing it only as solving "internal covariate shift" is incomplete.
+6. **Optimizer defaults are not universal.** Adam/AdamW are common starting points, not guaranteed best choices. Tune the learning-rate schedule, weight decay, batch size, and optimizer for the task and report the evaluation protocol.
+7. **Boosting does not only reduce bias.** It can reduce bias and sometimes variance, but can overfit. The result depends on tree complexity, shrinkage, data, and regularization.
+8. **PCA keeps variance, not necessarily predictive information.** Standardization is appropriate when feature scales should be comparable; it is not mandatory for every dataset. Choose scaling based on measurement units and objective.
+9. **Quantization does not guarantee a fixed memory reduction or negligible quality loss.** Weight precision, metadata, packing, activations, KV cache, and runtime buffers affect actual memory. Measure task quality and peak resources on the target runtime.
+10. **RAG can reduce some grounding errors, not eliminate hallucinations.** Retrieval can miss, mis-rank, or surface conflicting material. Evaluate retrieval and generation separately and cite sources that actually support the answer.
+11. **Lower temperature does not make answers factual.** It changes decoding randomness; it does not retrieve evidence or verify a claim.
+12. **Medical model examples are not deployment recommendations.** A model, quantization, small image sample, disclaimer, or clinician-in-the-loop does not establish clinical performance, safety, regulatory status, or suitability for CT/MRI.
+
+## A Strong Interview Answer
+
+For each question, use this order: define the concept; explain the mechanism; give a concrete example; name assumptions and limitations; describe how you would test it. If the question asks for an algorithm comparison, anchor it to the task, data size, error costs, latency/memory constraints, and evaluation split rather than naming a universal winner.
+
+When answering medical-imaging questions, add the image geometry and data-splitting details. For example, explain how patient-level separation avoids leakage, how an affine maps voxel coordinates to physical space, and why matching network tensors does not by itself validate the complete clinical workflow.
+
+## Practice Routine
+
+- Retrieve answers from memory before rereading; mark missing steps rather than memorizing paragraphs.
+- Derive the small formulas by hand and check dimensions/denominators.
+- For each metric, construct a tiny confusion matrix and explain which error it emphasizes.
+- For each model family, name one suitable task and one failure mode.
+- Update version-specific product/model examples against current primary documentation before using them in an interview or design.
+
+Continue with the [AI Engineering Study Roadmap](STUDY_ROADMAP.md) for a staged path from foundations to deployment.
 # 40 Essential Artificial Intelligence & Machine Learning Questions and Answers
 
 ---

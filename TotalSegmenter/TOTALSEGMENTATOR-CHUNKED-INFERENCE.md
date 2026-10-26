@@ -116,3 +116,25 @@ The report must identify the worker hash and pass the already-approved Dice, vol
 - Rust worker tests cover scratch-size overflow/refusal, full-width staged scratch estimates, singleton and multiaxis cubic parity against the full-buffer reference, global chunk planning, and existing preprocessing/blending behavior; all 34 worker tests pass.
 - Android inference tests cover snapshot validation, streamed-stage scratch estimates, pinned 1D and nonconstant 3D cubic tensors, constant edge behavior, chunk boundaries, the pinned window schedule and Gaussian map, cross-slab order-1 restoration, crop-to-native orientation, cancellation, and output cleanup. These component tests do not replace an Android whole-volume model run.
 - The Rust official-fixture preprocessing and whole-volume gates pass on r10. Android whole-volume fixture parity remains required before claiming measured cross-platform parity; no MedGemma gate is involved.
+
+## Reading The Chunking Contract
+
+Chunking bounds temporary accumulator memory; it must not redefine the patient's volume or the model's patch schedule. Review an implementation against these invariants:
+
+1. The model grid and global patch coordinates are fixed for the complete selected volume.
+2. Each output voxel receives every overlapping patch contribution required by the reference schedule, including contributions that cross a slab boundary.
+3. Accumulation and normalization happen before discrete class selection; labels are restored to the correct native grid and orientation.
+4. A slab is an output-memory partition, never an independent patient volume or an excuse to drop context.
+5. Budget refusal, cancellation, stale input, inference failure, and scratch failure produce no publishable partial segmentation.
+6. Measurements and history are derived only from the final validated complete output, with provenance and coverage retained.
+
+### Useful Failure-Injection Exercises
+
+- Use a small synthetic tensor and choose chunk boundaries that intersect overlapping patches; compare each voxel against a full-buffer reference.
+- Set the accumulator budget below one output plane and verify an explicit refusal rather than an oversized allocation.
+- Cancel during preprocessing, patch execution, and output restoration; verify cleanup and absence of partial publication.
+- Change the source revision before publication and verify that stale results are rejected.
+- Test empty labels, boundary-touching labels, translated origins, axis flips, and non-identity orientation separately.
+- Measure heap, native memory, mapped scratch, peak process RSS, and elapsed time separately; a file-size limit is not an RSS guarantee.
+
+The current evidence above remains platform-specific: desktop Rust has the recorded whole-volume fixture result; Android component tests pass but its whole-volume fixture parity is still unmeasured. This engineering status is not clinical validation. See the [AI Engineering Study Roadmap](../STUDY_ROADMAP.md) for prerequisites and the [Phase 0 Runbook](totalsegmentator-onnx-phase-0.md) for export/parity stages.

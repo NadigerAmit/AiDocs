@@ -385,4 +385,38 @@ When the model, lockfile, exporter, opset, runtime, Rust binding, or evidence ch
 
 | Version | Date | Change |
 |---|---|---|
+
+## 13. Deeper Study: Runtime Contracts And Failure Analysis
+
+After reproducing the existing evidence, use the following sequence to build a stronger mental model of native inference:
+
+1. **Inspect the model contract.** Record each input/output name, rank, dynamic/fixed dimensions, element type, axis meaning, and whether outputs are logits, probabilities, or labels. Assert these at the Rust boundary.
+2. **Trace preprocessing.** For a small synthetic input, save intermediate stages and verify units, layout, normalization, resampling, and coordinate transforms independently of the ONNX graph.
+3. **Compare numerically before discretizing.** Compare raw outputs first (max absolute error, mean absolute error, and optionally relative error). Argmax can hide score drift; Dice can hide errors on absent/small classes.
+4. **Test boundary behavior.** Include non-contiguous arrays where supported, invalid dimensions, NaN/Inf, empty masks, extreme values, cancellation, allocation failure, and output-write failure.
+5. **Measure the whole lifecycle.** Separate model load, preprocessing, inference, postprocessing, disk I/O, and cold/warm behavior. Record p50/p95, peak process memory, thread count, execution provider, and exact device/runtime versions.
+6. **Optimize only after a reference pass.** Compare execution providers, thread settings, graph optimizations, and reduced precision against a pinned baseline. Re-run representative parity and performance tests after every change.
+
+### Common Numerical Metrics
+
+For reference tensor `r` and candidate tensor `c`:
+
+```text
+max_abs_error  = max(abs(r - c))
+mean_abs_error = mean(abs(r - c))
+relative_error = abs(r - c) / max(abs(r), epsilon)
+```
+
+No single tolerance is universal. Choose tolerances before looking at held-out results, consider class/voxel-level effects, and report both numeric and task-level measures. Relative error is unstable near zero, so define its denominator policy explicitly.
+
+### Portability Checklist
+
+- Pin ONNX opset, exporter, runtime, Rust binding, and execution provider.
+- Verify operator coverage and graph metadata on each target platform.
+- Treat a successful CPU run as evidence only for that tested configuration.
+- Distinguish graph compatibility from package/distribution and model-weight licensing.
+- Preserve source-image affine, spacing, orientation, and label mapping through postprocessing.
+- Keep an immutable experiment record; append new dated results instead of silently changing historical evidence.
+
+Use the [AI Engineering Study Roadmap](STUDY_ROADMAP.md) to place this guide within the beginner-to-deployment sequence.
 | 1.0 | 2026-10-10 | Initial engineer guide for the pinned TotalSegmentator ONNX export and isolated Rust CPU smoke proof. |

@@ -610,4 +610,16 @@ while continuing preprocessing parity investigation as an independent research e
 
 In summary:
 
+The recommendation is to continue bounded, default-off engineering integration and preprocessing research as separate workstreams. The evidence supports synthetic local runtime plumbing only; it does not establish processor equivalence, clinical performance, or approval for patient-case evaluation. Keep those claims and gates explicit in every project decision.
+
+## Addendum: Scope Of The Recommendation
+
+This opinion is a project-direction recommendation, not a qualification result or authorization to run clinical studies. Its recommendation to avoid blocking all engineering integration on exact HF-fast pixel equality should be read narrowly: isolated, default-off application plumbing and non-patient synthetic testing may proceed while the parity investigation continues.
+
+It does **not** establish that the current native image path is behaviorally equivalent, that its response quality is acceptable, or that real CT/MRI evaluation can proceed. The current [Local Vision Guide](medgemma-local-vision-guide.md) records a blocked HF-fast tensor-parity gate, unqualified clinical performance, and explicit fixture/device constraints. A successful synthetic runtime test, matching token IDs, or a professional-looking answer cannot close those gates.
+
+Exact tensor equality is not a universal scientific prerequisite for every possible model deployment. However, choosing a different processor or tolerance is a substantive model-input change, not a paperwork shortcut. Before making an equivalence or performance claim, define the accepted processor as part of the model system, predeclare numeric/behavioral criteria, and evaluate downstream behavior on independently reviewed, representative, authorized data. Until those conditions and the applicable privacy, safety, and governance approvals are met, keep patient-case evaluation and clinical use out of scope.
+
+The original recommendation and dated evidence above are retained as historical analysis. Use the newest dated operational guide and audit for current implementation status, and use this document only for its decision rationale. For the full learning sequence, see the [AI Engineering Study Roadmap](../STUDY_ROADMAP.md).
+
 We have already demonstrated that MedGemma and mmproj-F16.gguf are operational and technically viable within the target architecture. The remaining preprocessing parity work is valuable research, but it should no longer be considered a release blocker for controlled RadAssist evaluation. The project's next major milestone should be obtaining feedback from radiologists using real CT and MRI studies, because that feedback will provide significantly more product value than additional months of tensor-level preprocessing analysis.

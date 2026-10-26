@@ -551,3 +551,32 @@ This guide is the concise operational entry point; the following records retain 
 
 When evidence changes, update this guide's evidence date, status, checklist and reproduction results alongside the detailed feasibility audit. Preserve dated historical observations instead of silently rewriting them. Do not promote a gate to passed based on plans, model-card claims, metadata strings, or a synthetic smoke test alone.
 
+## 12. Study Companion: Follow The Evidence Chain
+
+For a first pass, read Sections 1-3 to identify the exact model, projector, runtime, and CT reference. Then trace one input through Sections 5-7 and write down what changes at each boundary:
+
+```text
+DICOM pixels and metadata
+  -> selected series/frames and physical ordering
+  -> rescale/window/color conversion
+  -> encoded image bytes
+  -> runtime image resize/normalization
+  -> vision features and language-model tokens
+  -> generated text
+```
+
+Keep each step independently testable. A successful final response does not prove that every intermediate transformation matches the reference; a matching image tensor does not prove that the generated response is clinically correct.
+
+### Evidence Ladder
+
+Use these labels precisely when discussing results:
+
+- **Artifact identity:** local bytes match a recorded hash/size; this is not proof of trusted origin or clinical fitness.
+- **Runtime smoke:** the software loaded the selected artifacts and completed bounded inference on the tested synthetic input.
+- **Preprocessing parity:** the candidate and reference produced matching/tolerated input tensors under a predeclared comparison. The current HF-fast gate is blocked as recorded above.
+- **Input coverage:** the tested images/frames represent a declared coverage policy; a few selected frames do not become a whole-volume examination.
+- **Predictive performance:** outputs are compared with independent, appropriate reference annotations on representative held-out cases.
+- **Intended-use qualification:** performance, workflow, risks, privacy, platform behavior, and applicable regulatory requirements are assessed for the actual use.
+
+Do not merge these into a single PASS label. Read the current status banner and qualification table before reusing any dated result. Follow the [AI Engineering Study Roadmap](../STUDY_ROADMAP.md) for the prerequisite concepts and companion runbooks.
+

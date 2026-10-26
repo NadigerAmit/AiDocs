@@ -1224,3 +1224,56 @@ You are ready for:
 # Python, NumPy, Pandas and Scientific Computing for AI
 
 where we start touching code for the first time.
+
+---
+
+# Phase 0 Technical Notes And Practice
+
+This section adds precision to the mental models above. Use it alongside the earlier chapters; it does not replace them.
+
+## Important Refinements
+
+### Models do not all consume the same kind of vector
+
+Most machine-learning systems operate on numerical arrays called tensors, but the input structure depends on the task. A tabular model may consume a feature vector; a CNN consumes a tensor with spatial axes; a language model consumes token IDs and then learned embeddings; a segmentation model returns a spatial tensor of scores. The statement that "everything becomes vectors" is a useful first approximation, not a complete description of model interfaces.
+
+An embedding is a learned representation, not a universal dictionary of meaning. Similarity is meaningful only relative to the embedding model, its training objective, the input preprocessing, and the chosen distance or similarity function. Two vectors from unrelated embedding models should not be compared as though they shared a coordinate system.
+
+### A prediction is not a decision
+
+A model may emit a score, logit, probability estimate, mask, or generated text. A separate decision rule turns that output into an action. For a binary classifier, for example, a threshold converts a probability estimate into a positive/negative decision. The threshold should reflect the task's costs and be selected on validation data, not assumed to be 0.5 or selected using the final test set.
+
+Model confidence is not automatically calibrated probability. Calibration asks whether predictions assigned probability near 0.8 are correct about 80% of the time over a suitable evaluation population. Calibration can change under distribution shift and must be measured when probabilities drive decisions.
+
+### Learning is an optimization procedure, not human-like understanding
+
+Training adjusts parameters to improve an objective on observed examples. It does not prove that a model has learned a causal explanation or will behave correctly outside its training and evaluation conditions. A model can exploit shortcuts and still achieve a low loss. Hold-out evaluation, subgroup analysis, stress tests, and domain review are ways to look for those failures.
+
+Likewise, "AI recognizes patterns" is a useful introduction but not a complete account of every AI system. Rule-based systems, search/planning, probabilistic models, and learned models use different mechanisms; modern applications often combine several of them.
+
+## Worked Example: From Scores To A Safe Action
+
+Suppose an intent model returns scores for `tune_channel`, `search_guide`, and `unsupported`:
+
+```text
+tune_channel: 0.47
+search_guide: 0.45
+unsupported: 0.08
+```
+
+The largest score is not enough to justify tuning a channel: the top two classes are close, and a score is not known to be calibrated. A production policy could ask a clarifying question when the top-two margin is small, reject low-confidence or out-of-domain text, validate the selected channel against an allowlist, and require confirmation before a consequential action. This is application policy around the model, not something the model guarantees by itself.
+
+## Study Exercises
+
+1. For a house-price example, identify one feature, one label, model parameters, one hyperparameter, the loss, and an evaluation metric.
+2. Draw the data flow for image classification and image segmentation. Label tensor shapes and identify where preprocessing happens.
+3. Explain why embeddings from two different models cannot automatically be compared by cosine similarity.
+4. Given a confusion matrix, calculate precision and recall, then describe which error is more costly for the hypothetical application.
+5. Describe a data split for multiple scans from the same patient and explain why a random image-level split can leak patient-specific information.
+6. Give one example of correlation without causation and one reason a predictive model may still fail after that correlation changes.
+
+## Readiness Check
+
+Before moving to the coding phase, be able to distinguish: feature from label; parameter from hyperparameter; training loss from evaluation metric; logit from probability; model output from application decision; and engineering parity from real-world performance. If a term is unclear, return to the relevant chapter and make a one-sentence definition plus a concrete example.
+
+Continue with the directory's [AI Engineering Study Roadmap](../STUDY_ROADMAP.md), then proceed to Python, NumPy, Pandas, plotting, and basic experimentation before training neural networks.

@@ -26,6 +26,8 @@ The classifier routes incoming query strings across seven discrete functional ta
 | **Synonym Handling** | ❌ **Weak.** Relies on explicit word patterns mapped during text extraction compilation. | 🎯 **Exceptional.** Understands vector distances between abstract concepts natively. | 🛡️ **Robust.** Captures standard operations instantly while processing loose language safely. |
 | **Binary/Asset Size On-Disk** | 📦 **Minimal (< 1 MB).** Vocabulary weights compile right into your application binary file. | 📦 **~35 MB total.** Requires storing an external `.onnx` weight model and `tokenizer.json` on disk. | 📦 **~35 MB total.** Bundles both engines, keeping the heavy ONNX session inactive until triggered. |
 
+> **Measurement note:** Memory, latency, model size, and synonym-quality entries above are illustrative estimates from an assumed implementation, not portable guarantees or benchmark results. Measure cold start, warm p50/p95 latency, peak resident memory, package size, and energy on each supported device with representative inputs. A confidence threshold must be selected and validated on held-out, deployment-like data; a threshold alone cannot guarantee out-of-domain rejection.
+
 ---
 
 ## 3. Handling Out-of-Dataset Queries & Future Scalability
@@ -399,6 +401,33 @@ fn main() {
     println!("Production Hybrid Pipeline compiled cleanly.");
 }
 ```
+
+## Production Qualification And Safe Routing
+
+Treat the classifier as a proposal generator, not as an authorization boundary. A predicted intent must pass deterministic application checks before it can invoke an MCP tool:
+
+1. Validate the intent against a closed enum and the tool against an explicit allowlist.
+2. Validate every argument against a typed schema; do not pass raw user text into privileged command fields without parsing and validation.
+3. Enforce user/session authorization independently of model output.
+4. Ask a clarifying question for ambiguous intent/entity pairs and require confirmation for actions with meaningful side effects.
+5. Handle timeout, unavailable model, invalid output, low margin, out-of-domain input, and runtime errors with a safe non-action result.
+6. Bound input length, inference time, memory, and model initialization; avoid logging sensitive utterances unnecessarily.
+
+### Evaluation Protocol
+
+Build a representative, versioned dataset with multiple paraphrases per intent, entity variation, spelling/noise variation, ambiguous requests, unsupported requests, and adversarially similar examples. Split by speaker/session or source where correlated utterances could otherwise leak across partitions. Keep a final test set untouched until model and threshold choices are complete.
+
+Report per-intent precision and recall, macro-F1, the confusion matrix, rejection coverage, false-action rate, and latency/resource distributions. Evaluate the reject/abstain policy as part of the system. Review whether the examples represent accents, languages, speech-recognition errors, and device naming conventions expected in deployment. Re-evaluate after changing tokenizer, vocabulary, embedding model, classifier, threshold, or runtime.
+
+For cosine similarity, reject zero-norm vectors and check all values are finite before normalization. Ensure query and intent vectors come from the same embedding model and preprocessing. Store model identity, tokenizer revision, label map, and vector normalization policy with the shipped prototypes.
+
+The implementation sketch below is a teaching blueprint, not drop-in production code: its `unwrap()` calls, hard-coded dimensions, error handling, placeholder MCP types, and direct action routing require replacement with validated fallible APIs and application authorization before use. The embeddings and similarity scores also need task-specific validation; do not treat a successful compile as evidence of classifier quality.
+
+### Correction To The Unseen-Input Example
+
+The numeric thresholds and claim about uniform probability in Section 3.1 are not mathematical guarantees. An all-zero TF-IDF vector can produce class priors/bias-based outputs, while an embedding similarity score is not a calibrated class probability. Use explicit empty-feature detection, margin/threshold policies calibrated on held-out data, and a tested abstention path. Confirm the behavior on the actual classifier implementation.
+
+For the learning order, continue through the [AI Engineering Study Roadmap](STUDY_ROADMAP.md).
 
 ---
 

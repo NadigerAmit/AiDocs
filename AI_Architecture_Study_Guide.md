@@ -27,6 +27,7 @@
 19. ONNX vs GGUF
 20. TF-IDF vs MiniLM
 21. Summary Cheat Sheet
+22. Architecture Selection And System-Level Reasoning
 
 ---
 
@@ -1008,3 +1009,64 @@ Recommended learning order:
 12. AI Agents
 
 Mastering these topics will give you a strong foundation to design and extend enterprise-grade medical AI systems such as RadAssist.
+
+---
+
+# Architecture Selection And System-Level Reasoning
+
+The architecture names above are starting points, not complete deployment specifications. A useful design describes the whole path from source data to a validated application result.
+
+## Match The Model To The Task
+
+| Task | Common output | Architecture families to consider | Important evaluation |
+|---|---|---|---|
+| Tabular classification | Class scores or probabilities | Logistic regression, trees, gradient boosting, MLP | Per-class precision/recall, calibration, subgroup performance |
+| Text intent classification | Intent plus score or abstention | TF-IDF with linear model, encoder embeddings with classifier | Confusion matrix, out-of-domain rejection, latency on target hardware |
+| Image classification | Class scores | CNN, ViT, hybrid | Sensitivity/specificity, calibration, site/device shift |
+| Semantic segmentation | Per-voxel class scores or labels | U-Net/nnU-Net, transformer hybrids | Per-class overlap, geometry, laterality, boundary and empty-mask handling |
+| Text generation | Token sequence | Autoregressive Transformer | Task-specific factuality, coverage, abstention, safety and human review |
+| Image generation | Image or latent sample | Diffusion, GAN, VAE families | Fidelity, diversity, conditioning adherence, misuse risk |
+
+Architecture selection should also consider available training data, inference memory, latency, supported operators, model/update licensing, device support, and the cost of failure. A larger or newer model is not automatically a better fit.
+
+## The Full Inference System
+
+For an imaging workflow, document each boundary explicitly:
+
+```text
+Source format
+  -> decode and validate
+  -> orientation / geometry handling
+  -> model-specific preprocessing
+  -> tensor contract (shape, dtype, axes, units)
+  -> model runtime
+  -> logits / probabilities / generated output
+  -> postprocessing and label mapping
+  -> source-grid restoration and provenance
+  -> user-facing review and failure handling
+```
+
+Each arrow can introduce defects. Version and test preprocessing separately from the neural-network graph. Preserve source geometry and provenance, and distinguish incomplete coverage from negative findings. A plausible overlay or fluent explanation is not proof of correctness.
+
+## Important Qualifications To Earlier Simplifications
+
+- CNNs are effective for local spatial structure, but are not limited to images and do not guarantee translation invariance; convolution is translation-equivariant under idealized conditions, while padding, stride, and pooling affect that property.
+- Transformers can process positions in parallel during training, but autoregressive generation still proceeds token by token. Standard self-attention also has sequence-length and memory costs; architecture and runtime optimizations change the practical trade-offs.
+- U-Net is widely used in segmentation, not the only or universally best medical-imaging architecture. Model choice depends on task, labels, data, compute, and validation.
+- A vision-language model output is generated text conditioned on inputs, not an independently verified diagnosis. A human review step does not convert an unvalidated model into a clinically validated device.
+- ONNX is a graph interchange format and GGUF is an ecosystem-specific model container; neither format alone guarantees speed, portability, or accuracy.
+- TF-IDF does not understand meaning by itself. MiniLM embeddings can encode semantic similarity, but similarity is not intent certainty, and application-specific evaluation and rejection logic remain necessary.
+
+## Design Review Checklist
+
+Before calling an architecture ready for an application, answer:
+
+1. What is the intended use, user, input, output, and explicit out-of-scope behavior?
+2. Which exact model weights, code, tokenizer, preprocessing, class map, and runtime are used?
+3. What are the tensor shapes, axis order, numeric range, coordinate system, and output interpretation?
+4. Which independent data represents the deployment population, and how are patient/site/time leakage prevented?
+5. Which metrics and predeclared thresholds represent the important failure modes?
+6. What happens on invalid inputs, unsupported cases, low confidence, timeout, cancellation, or resource exhaustion?
+7. What evidence is engineering parity, what is predictive performance, and what remains unmeasured?
+
+Use the [AI Engineering Study Roadmap](STUDY_ROADMAP.md) for the recommended order through the detailed inference and qualification guides.

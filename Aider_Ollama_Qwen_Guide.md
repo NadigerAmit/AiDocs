@@ -852,3 +852,41 @@ This provides one of the best balances currently available between:
 - Resource consumption
 
 for professional software development on modern laptops.
+
+---
+
+# Operational Notes: Reliability, Privacy, And Model Drift
+
+This guide describes one local-tool configuration, not a permanent recommendation. Model tags, context limits, quantization, Aider/Ollama configuration keys, licensing, and hardware requirements change. Before installing, verify the current Aider and Ollama documentation, the exact model tag and license, and the available RAM/VRAM on the target machine. Treat the hardware table and model-quality statements above as estimates for the stated setup, not portable benchmarks.
+
+## What “Local” Does And Does Not Mean
+
+Local inference can avoid sending prompts to a hosted model endpoint, but it does not automatically guarantee privacy or security. Review the configured provider/base URL, model-pull source, logs and shell history, editor extensions, telemetry settings, repository permissions, file access, and any tools the assistant can invoke. Do not include credentials, patient data, or proprietary files unless your policy explicitly permits it. Keep model artifacts and private inputs out of Git.
+
+## Safe Change Loop
+
+1. Start from a clean or understood Git worktree and state the requested scope.
+2. Add only the files needed for context; exclude secrets, generated data, and unrelated large files.
+3. Ask for a small change with expected behavior and tests, and request clarification when requirements are ambiguous.
+4. Inspect the complete diff, including new files and configuration changes.
+5. Run the relevant tests, formatters, and security checks yourself; a model's claim that a command passed is not evidence that it ran.
+6. Review dependencies, shell commands, network access, destructive operations, and generated credentials before execution.
+7. Commit only after human review, with a clear message and a recoverable diff.
+
+Avoid automatic command approval and automatic commits for an unfamiliar repository. Keep a separate backup or rely on reviewed Git history; never assume a coding model will preserve every behavior not named in a prompt.
+
+## Prompt Template For Engineering Tasks
+
+```text
+Goal: [observable behavior to add or fix]
+Scope: [files/components allowed to change]
+Constraints: [APIs, compatibility, security, performance]
+Evidence: [failing test, expected output, or reproduction]
+Acceptance checks: [commands/behaviors to verify]
+Before editing: summarize the controlling code path and the smallest test.
+After editing: report changed files, tests actually run, and remaining uncertainty.
+```
+
+This template improves task clarity, but the generated patch still needs the same review and verification as a human-written change.
+
+For the broader learning sequence, see the [AI Engineering Study Roadmap](STUDY_ROADMAP.md).

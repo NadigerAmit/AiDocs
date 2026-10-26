@@ -503,4 +503,36 @@ Verify these references again when selecting versions; upstream documentation is
 - [PyTorch ONNX export documentation](https://docs.pytorch.org/docs/stable/onnx.html)
 - [ONNX Runtime documentation](https://onnxruntime.ai/docs/)
 
+## 11. Study Notes: From Export To Evidence
+
+The runbook is organized as a sequence of increasingly demanding claims. Use it as a learning exercise by writing down the question each stage answers:
+
+| Stage | Question | A pass does not establish |
+|---|---|---|
+| Checkpoint identity | Did the run load the intended weights/configuration? | Correct preprocessing or output quality |
+| Graph structure | Can the ONNX graph be parsed and executed? | Numeric parity or correct geometry |
+| Tensor parity | Do reference and exported network outputs agree on the same input tensor? | Full-volume pipeline parity |
+| Volume parity | Does the app pipeline match the selected reference on the approved fixture? | Independent clinical accuracy or other-case generalization |
+| Resource profile | Does the tested build fit the measured target conditions? | Other devices, loads, or future versions |
+| Intended-use evaluation | Does the complete system meet predeclared performance and workflow needs? | Automatic approval for broader or different use |
+
+### Concepts To Be Able To Explain
+
+- Why one complete volume is not equivalent to independently processing its slices.
+- Why axis order, spacing, affine, orientation, and label mapping travel with the image data.
+- Why blending logits before `argmax` can differ from blending discrete labels.
+- Why an empty-versus-empty mask can score well without testing detection of that class.
+- Why overall Dice can conceal poor performance on a small organ or a particular subgroup.
+- Why a CPU parity result says nothing by itself about GPU, Android, memory, or latency behavior.
+
+### Suggested Exercises
+
+1. Create a tiny synthetic volume with known spacing and a left/right asymmetric object; apply an intentional axis flip and verify that the laterality test catches it.
+2. Compare the same toy model tensor at the PyTorch and ONNX boundaries before applying `argmax`.
+3. Compute per-class Dice for present, absent, and deliberately shifted masks; explain each denominator/empty-mask policy.
+4. Draw the preprocessing and postprocessing path, annotating every coordinate transform and the grid on which each mask exists.
+5. Write a one-paragraph result that clearly separates the input, exact tested configuration, metric, scope, and limitations.
+
+The controlled study sequence for this directory is in the [AI Engineering Study Roadmap](../STUDY_ROADMAP.md); the companion [ONNX and Rust Engineering Guide](../onnx-and-rust-engineering-guide.md) introduces the tensor/runtime concepts first.
+
 The upstream documentation was consulted on 2026-10-10. The run's pinned source tag, package lock, checkpoint hashes, and license decision take precedence over this date-stamped summary.

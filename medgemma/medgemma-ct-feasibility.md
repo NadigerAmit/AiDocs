@@ -103,6 +103,22 @@ The machine-readable output is `target/medgemma-bootstrap/processor-reference-re
 
 For a quick resize/tokenizer-only rerun without model generation, use the same command with `--skip-runtime`; it writes a separate `target/medgemma-bootstrap/processor-reference-resize-result.json` so the last full runtime result is preserved. Both the focused and full runs return status 2 while strict parity is blocked. The `--skip-runtime` result has no runtime evidence and must not be treated as a completed full qualification.
 
+## How To Read This Audit
+
+This file is an append-only engineering record, not a timeless model card. The `Observed` date, section dates, pinned revisions, test commands, and explicit gate outcomes are part of each claim. A later run may supersede one observation but does not erase what an earlier run established. Before relying on a result, check the newest dated status in the [Local Vision Guide](medgemma-local-vision-guide.md) and its qualification table.
+
+Interpret results by evidence level:
+
+1. **Identity and integrity:** hashes identify bytes relative to a recorded value; they do not authenticate the publisher or prove correct pairing.
+2. **Synthetic plumbing:** a generated image can show that the selected runtime path executes; it does not model anatomical inputs or measure diagnosis quality.
+3. **Preprocessing parity:** compare the actual tensor at the model boundary. Token equality, matching dimensions, or a successful image encode cannot substitute for tensor comparison.
+4. **Pipeline parity:** compare geometry, preprocessing, logits/labels, and measurements on an approved fixture. Agreement with a reference using the same model is implementation evidence, not independent clinical accuracy.
+5. **Intended-use evidence:** requires authorized representative inputs, independent references, predeclared analysis, platform/resource tests, workflow review, and applicable governance.
+
+The current processor mismatch and fixture/device gates are blockers to the claims they directly concern. Do not work around them by silently changing the reference, accepting a post-hoc tolerance, or relabeling a synthetic result. Any future alternative processor requires an explicit technical rationale, predeclared acceptance criteria, and behavioral evaluation on separately authorized data.
+
+Use the [AI Engineering Study Roadmap](../STUDY_ROADMAP.md) to review prerequisites before attempting to reproduce the deeper runtime evidence.
+
 ## Synthetic Geometry Verification
 
 Executed from the existing workspace, without dependency downloads or lockfile changes:
